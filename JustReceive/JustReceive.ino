@@ -6,9 +6,10 @@
 */
 
 #include <SPI.h>
-#include "RF24.h"
 #include "IoShoe.h"
-#include <Wire.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+#include <RF24_config.h>
 
 using IoShoe::EventStorage;
 
@@ -90,6 +91,8 @@ void setup() {
   radio.openWritingPipe(address);             // communicate back and forth.  One listens on it, the other talks to it.
   radio.openReadingPipe(1,address); 
     // Start the radio listening for data
+  radio.enableDynamicAck();
+  radio.setAutoAck(false); // disable auto ack
   radio.startListening();
 
   attachInterrupt(0, check_radio, LOW);             // Attach interrupt handler to interrupt #0 (using pin 2) on BOTH the sender and receiver
@@ -103,7 +106,7 @@ void send() {
 
   myData._micros = micros();
 
-  radio.startWrite(&myData, sizeof(myData),0);
+  radio.startWrite(&myData, sizeof(myData),1); // 1 to send message that does not require ack
 
   // if (!radio.write( &myData, sizeof(myData) )){
   //  Serial.println(F("failed"));
@@ -155,7 +158,7 @@ void loop() {
             //flashLed(ledPin, ON_EVT_GENERATED);
     
             digitalWrite(shoelacePin, HIGH);
-            shoelaceState = true;
+            shoelaceState = truea
             lastLightUpTime = millis();
             send() ;
           }
@@ -171,7 +174,7 @@ void loop() {
 
  void check_radio(void)                                // Receiver role: Does nothing!  All the work is in IRQ
 {
-  
+  Serial.println("Interrupt");
   bool tx,fail,rx;
   radio.whatHappened(tx,fail,rx);                     // What happened?
 
@@ -214,7 +217,7 @@ void loop() {
   }
 
 
-  radio.startListening(); 
+  // radio.startListening(); 
 
   // Start listening if transmission is complete
   if( tx || fail ){
