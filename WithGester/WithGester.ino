@@ -6,9 +6,12 @@
 */
 
 #include <SPI.h>
-#include "RF24.h"
+#include <nRF24L01.h>
+#include <RF24.h>
+#include <RF24_config.h>
 #include "IoShoe.h"
-#include <Wire.h>
+ #include <Wire.h>
+
 #include <Adafruit_MMA8451.h>
 #include <Adafruit_Sensor.h>
 #include <RunningMedian.h>
@@ -116,7 +119,9 @@ void setup() {
 
   radio.openWritingPipe(address);             // communicate back and forth.  One listens on it, the other talks to it.
   radio.openReadingPipe(1,address); 
-    // Start the radio listening for data
+  radio.enableDynamicAck();
+  radio.setAutoAck(false);
+  // Start the radio listening for data
   radio.startListening();
 
   attachInterrupt(0, check_radio, LOW);             // Attach interrupt handler to interrupt #0 (using pin 2) on BOTH the sender and receiver
@@ -166,7 +171,7 @@ void send() {
 
   myData._micros = micros();
 
-  radio.startWrite(&myData, sizeof(myData),0);
+  radio.startWrite(&myData, sizeof(myData),1); // 1 to send message that does not require ack
 
   // if (!radio.write( &myData, sizeof(myData) )){
   //  Serial.println(F("failed"));
@@ -276,7 +281,7 @@ void loop() {
   }
 
 
-  radio.startListening(); 
+  // radio.startListening(); 
 
   // Start listening if transmission is complete
   if( tx || fail ){

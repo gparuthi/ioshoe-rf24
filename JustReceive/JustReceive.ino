@@ -158,7 +158,7 @@ void loop() {
             //flashLed(ledPin, ON_EVT_GENERATED);
     
             digitalWrite(shoelacePin, HIGH);
-            shoelaceState = truea
+            shoelaceState = true;
             lastLightUpTime = millis();
             send() ;
           }
